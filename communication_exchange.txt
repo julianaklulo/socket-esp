@@ -1,0 +1,65 @@
+Checking ESP module
+COMMAND: AT
+LINE: AT
+LINE: OK
+Connecting to WiFi
+COMMAND: AT+CWMODE=1
+LINE: AT+CWMODE=1
+LINE: OK
+COMMAND: AT+CWJAP="SSID","PASSWORD"
+LINE: AT+CWJAP="SSID","PASSWORD"
+LINE: WIFI DISCONNECT
+LINE: WIFI CONNECTED
+LINE: WIFI GOT IP
+LINE: OK
+WiFi connected
+Making request
+COMMAND: AT+CIPSTART="TCP","jsonplaceholder.typicode.com",80
+LINE: AT+CIPSTART="TCP","jsonplaceholder.typicode.com",80
+LINE: CONNECT
+LINE: OK
+COMMAND: AT+CIPSEND=61
+LINE: AT+CIPSEND=61
+LINE: OK
+LINE: > 
+LINE: Recv 61 bytes
+LINE: SEND OK
+LINE: 
+LINE: +IPD,1115:HTTP/1.1 200 OK
+LINE: Date: Tue, 21 Feb 2023 18:57:58 GMT
+LINE: Content-Type: application/json; charset=utf-8
+LINE: Content-Length: 83
+LINE: Connection: keep-alive
+LINE: X-Powered-By: Express
+LINE: X-Ratelimit-Limit: 1000
+LINE: X-Ratelimit-Remaining: 999
+LINE: X-Ratelimit-Reset: 1676889818
+LINE: Vary: Origin, Accept-Encoding
+LINE: Access-Control-Allow-Credentials: true
+LINE: Cache-Control: max-age=43200
+LINE: Pragma: no-cache
+LINE: Expires: -1
+LINE: X-Content-Type-Options: nosniff
+LINE: Etag: W/"53-hfEnumeNh6YirfjyjaujcOPPT+s"
+LINE: Via: 1.1 vegur
+LINE: CF-Cache-Status: HIT
+LINE: Age: 569
+LINE: Accept-Ranges: bytes
+LINE: Server-Timing: cf-q-config;dur=6.0000020312145e-06
+LINE: Report-To: {"endpoints":[{"url":"https:\/\/a.nel.cloudflare.com\/report\/v3?s=wDaYvLaKPM5VxLuRUgkAKDyDAIDbkJ0qlMxMTnLC%2BPrU5EcsfHwZ9tvXl3SvMZ5wmS1XS%2BLA%2FXTHBezGY7mA2C4RKZDHyhIuYV%2FE87G2G0zh3E9ShK%2F5Ik2hQaWj68AAtF2QrgR%2FcBuEopJET4IO"}],"group":"cf-nel","max_age":604800}
+LINE: NEL: {"success_fraction":0,"report_to":"cf-nel","max_age":604800}
+LINE: Server: cloudflare
+LINE: CF-RAY: 79d1b5f4cb40a56b-GRU
+LINE: alt-svc: h3=":443"; ma=86400, h3-29=":443"; ma=86400
+LINE: 
+LINE: {
+LINE:   "userId": 1,
+LINE:   "id": 1,
+LINE:   "title": "delectus aut autem",
+LINE:   "completed": false
+LINE: }
+LINE: 
+COMMAND: AT+CIPCLOSE
+LINE: AT+CIPCLOSE
+LINE: CLOSED
+LINE: OK
