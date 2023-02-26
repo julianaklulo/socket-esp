@@ -3,10 +3,14 @@ import utime
 import json
 
 
-class ESP():
-    def __init__(self):
+class ESP:
+    def __init__(self, ssid, password):
         self._uart = machine.UART(0, baudrate=115200, rxbuf=10000)
         self._tcp_open = False
+        self._ssid = ssid
+        self._password = password
+        self._wifi_connected = False
+        self.connect_to_wifi(self._ssid, self._password)
 
     def read_line(self, ignore_empty=True, timeout=2000):
         """Read one line of data from ESP module."""
@@ -28,10 +32,26 @@ class ESP():
         except Exception as e:
             return ""
 
-    def send_command(self, command, timeout=2000):
+    def read_bytes(self, length=1, timeout=2000):
+        """Read bytes of data from ESP module."""
+        response = b""
+        try:
+            limit = utime.ticks_ms() + timeout
+            while utime.ticks_ms() < limit:
+                if self._uart.any() <= length:
+                    received = self._uart.read(length)
+                    response = response + received
+                    break
+            print(f"BYTES: {response.decode()}")
+            return response
+        except Exception as e:
+            return b""
+
+    def send_at_command(self, command, timeout=2000):
         """
         Send an AT command to ESP module.
-        Returns the reponse for the command, ignoring the echo."""
+        Returns the reponse for the command, ignoring the echo.
+        """
         self._uart.write(f"{command}\r\n")
         print(f"COMMAND: {command}")
         self.read_line(timeout=timeout) # echo
@@ -39,15 +59,15 @@ class ESP():
 
     def check_ESP(self):
         """Test communication with ESP module."""
-        return self.send_command("AT") == "OK"
+        return self.send_at_command("AT") == "OK"
 
     def connect_to_wifi(self, ssid, password):
         """Connect to WiFi using SSID and password provided."""
-        if not self.send_command("AT+CWMODE=1") == "OK":
+        if not self.send_at_command("AT+CWMODE=1") == "OK":
             print("Failed to configure Station mode")
             return False
 
-        if not self.send_command(f'AT+CWJAP="{ssid}","{password}"', timeout=10000) == "WIFI DISCONNECT":
+        if not self.send_at_command(f'AT+CWJAP="{ssid}","{password}"', timeout=10000) == "WIFI DISCONNECT":
             print("Unexpected response")
             return False
 
@@ -59,11 +79,12 @@ class ESP():
             print("Error getting an IP")
             return False
 
-        return self.read_line() == "OK"
+        self._wifi_connected = self.read_line() == "OK"
+        return self._wifi_connected
 
     def create_tcp_connection(self, host, port=80):
         """Create a TCP connection to a host and port."""
-        if self.send_command(f'AT+CIPSTART="TCP","{host}",{port}', timeout=10000) == "CONNECT":
+        if self.send_at_command(f'AT+CIPSTART="TCP","{host}",{port}', timeout=10000) == "CONNECT":
             if self.read_line() == "OK":
                 return True
         print("Error creating TCP connection")
@@ -84,7 +105,7 @@ class ESP():
     def close_tcp_connection(self):
         """Close the TCP connection."""
         if self._tcp_open:
-            if self.send_command("AT+CIPCLOSE", timeout=10000) == "CLOSED":
+            if self.send_at_command("AT+CIPCLOSE", timeout=10000) == "CLOSED":
                 if self.read_line() == "OK":
                     self._tcp_open = False
                     return True
@@ -94,7 +115,7 @@ class ESP():
         
     def send_data(self, data):
         """Send data over the TCP connection."""
-        if self.send_command(f'AT+CIPSEND={len(data)}', timeout=10000) == "OK":
+        if self.send_at_command(f'AT+CIPSEND={len(data)}', timeout=10000) == "OK":
             self._uart.write(data)
             while True:
                 response = self.read_line(timeout=10000)
@@ -153,4 +174,3 @@ class ESP():
             response["header"] = header
 
         return response
-
